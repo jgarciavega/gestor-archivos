@@ -1,6 +1,8 @@
 // pages/index.js
 import FileUploader from '../components/FileUploader';
 
+
+
 export default function Home() {
   return (
     <div className="container mx-auto">

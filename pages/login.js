@@ -1,67 +1,96 @@
-// pages/login.js
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { signIn } from 'next-auth/react';
+import Image from 'next/image';
+import AuthLayout from '../components/AuthLayout';
+import FileUploader from '../components/FileUploader';
 
 export default function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (username === 'admin' && password === 'admin') {
-      setError('');
-      alert('Login exitoso!');
-    } else {
-      setError('Credenciales incorrectas');
-    }
+  const onSubmit = async (data) => {
+    const result = await signIn('credentials', {
+      redirect: false,
+      email: data.email,
+      password: data.password
+    });
+    
+    if (result.error) alert('Credenciales incorrectas');
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-cover 
-    bg-center" style={{ backgroundImage: 'url(public/foto-login.jpg)' }}>
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96 opacity-90">
-        <h2 className="text-3xl font-bold text-center mb-6">Iniciar sesión</h2>
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-        <form onSubmit={handleLogin}>
-          <div className="mb-4">
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-              Correo electrónico
-            </label>
-            <input
-              type="email"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+    <AuthLayout>
+      <div className="relative min-h-screen flex items-center justify-center">
+        <Image
+          src="/login.jpg"
+          alt="Background"
+          layout="fill"
+          objectFit="cover"
+          className="z-0"
+        />
+        
+        <div className="relative z-10 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-8 w-full max-w-md shadow-2xl">
+          <div className="mb-8 text-center">
+            <Image
+              src="/api_logo.png"
+              alt="Logo"
+              width={180}
+              height={60}
+              priority
             />
           </div>
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Campo Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <input
+                {...register("email", {
+                  required: "Este campo es obligatorio",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Correo electrónico inválido"
+                  }
+                })}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              )}
+            </div>
+
+            {/* Campo Contraseña */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+              <input
+                type="password"
+                {...register("password", {
+                  required: "Este campo es obligatorio",
+                  minLength: {
+                    value: 6,
+                    message: "Mínimo 6 caracteres"
+                  }
+                })}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              )}
+            </div>
+
+            {/* Componente FileUploader */}
+            <FileUploader 
+              onUploadComplete={(data) => console.log('Archivo subido:', data)}
             />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            Ingresar
-          </button>
-        </form>
-        <div className="mt-4 text-center">
-          <a href="/recuperar-credenciales" className="text-sm text-blue-500 hover:underline">
-            ¿Olvidaste tu contraseña?
-          </a>
+
+            <button
+              type="submit"
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Iniciar Sesión
+            </button>
+          </form>
         </div>
       </div>
-    </div>
+    </AuthLayout>
   );
 }
