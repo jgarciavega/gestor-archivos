@@ -1,12 +1,13 @@
-// pages/_app.js
-import '../styles/globals.css'; 
-import { useEffect } from 'react';
+import { SessionProvider } from "next-auth/react";
+import '../styles/globals.css';
+
 
 function MyApp({ Component, pageProps }) {
-  useEffect(() => {
-    // Esta función se ejecutará cuando la página esté cargada
-  }, []);
-  return <Component {...pageProps} />;
+  return (
+    <SessionProvider session={pageProps.session}>
+      <Component {...pageProps} />
+    </SessionProvider>
+  );
 }
 
 export default MyApp;

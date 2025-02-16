@@ -1,96 +1,95 @@
-import { useForm } from 'react-hook-form';
-import { signIn } from 'next-auth/react';
-import Image from 'next/image';
-import AuthLayout from '../components/AuthLayout';
-import FileUploader from '../components/FileUploader';
+import { useForm } from "react-hook-form";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/router";
+import Image from "next/image";
 
 export default function Login() {
   const { register, handleSubmit, formState: { errors } } = useForm();
+  const router = useRouter();
 
   const onSubmit = async (data) => {
-    const result = await signIn('credentials', {
+    const result = await signIn("credentials", {
       redirect: false,
       email: data.email,
-      password: data.password
+      password: data.password,
     });
-    
-    if (result.error) alert('Credenciales incorrectas');
+
+    if (result.error) {
+      router.push("/recover"); // 🔴 Si las credenciales son incorrectas, redirige a recover
+    } else {
+      router.push("/"); // ✅ Si el login es exitoso, redirige a la página principal
+    }
   };
 
   return (
-    <AuthLayout>
-      <div className="relative min-h-screen flex items-center justify-center">
-        <Image
-          src="/login.jpg"
-          alt="Background"
-          layout="fill"
-          objectFit="cover"
-          className="z-0"
-        />
-        
-        <div className="relative z-10 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-8 w-full max-w-md shadow-2xl">
-          <div className="mb-8 text-center">
-            <Image
-              src="/api_logo.png"
-              alt="Logo"
-              width={180}
-              height={60}
-              priority
+    <div className="relative w-full h-screen flex justify-center items-center bg-gray-900">
+      {/* Imagen de fondo */}
+      <Image 
+        src="/login.jpg" 
+        alt="Fondo"
+        layout="fill"
+        objectFit="cover"
+        className="absolute top-0 left-0 w-full h-full -z-10"
+      />
+
+      {/* Cuadro del login con fondo blanco */}
+      <div className="bg-white shadow-xl rounded-lg p-6 w-[320px] border border-gray-300">
+        {/* Logo centrado arriba */}
+        <div className="text-center mb-4">
+          <Image src="/api_logo.png" alt="Logo" width={130} height={40} priority />
+        </div>
+
+        {/* Título del formulario */}
+        <h2 className="text-lg font-bold text-center text-gray-800 mb-4">Iniciar Sesión</h2>
+
+        {/* Formulario de inicio de sesión */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Campo de correo electrónico */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700">Correo electrónico</label>
+            <input
+              {...register("email", {
+                required: "Este campo es obligatorio",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Correo electrónico inválido"
+                }
+              })}
+              className="w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:border-red-500 focus:ring focus:ring-red-200 outline-none"
             />
+            {errors.email && (
+              <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
+            )}
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Campo Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input
-                {...register("email", {
-                  required: "Este campo es obligatorio",
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Correo electrónico inválido"
-                  }
-                })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-              )}
-            </div>
-
-            {/* Campo Contraseña */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Contraseña</label>
-              <input
-                type="password"
-                {...register("password", {
-                  required: "Este campo es obligatorio",
-                  minLength: {
-                    value: 6,
-                    message: "Mínimo 6 caracteres"
-                  }
-                })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-              )}
-            </div>
-
-            {/* Componente FileUploader */}
-            <FileUploader 
-              onUploadComplete={(data) => console.log('Archivo subido:', data)}
+          {/* Campo de contraseña */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700">Contraseña</label>
+            <input
+              type="password"
+              {...register("password", {
+                required: "Este campo es obligatorio",
+                minLength: {
+                  value: 6,
+                  message: "Mínimo 6 caracteres"
+                }
+              })}
+              className="w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:border-red-500 focus:ring focus:ring-red-200 outline-none"
             />
+            {errors.password && (
+              <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
+            )}
+          </div>
 
-            <button
-              type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Iniciar Sesión
-            </button>
-          </form>
-        </div>
+          {/* Botón de inicio de sesión en rojo */}
+          <button
+            type="submit"
+            className="w-full py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            Ingresar
+          </button>
+        </form>
       </div>
-    </AuthLayout>
+    </div>
   );
 }
