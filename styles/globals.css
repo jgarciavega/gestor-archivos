@@ -6,3 +6,10 @@
 body {
   @apply antialiased;
 }
+
+@layer components {
+  .login-container {
+    background: white !important;
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1) !important;
+  }
+}

@@ -1,11 +1,13 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import Image from "next/image";
 
 export default function Login() {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit } = useForm();
   const router = useRouter();
+  const [loginError, setLoginError] = useState(false);
 
   const onSubmit = async (data) => {
     const result = await signIn("credentials", {
@@ -15,15 +17,14 @@ export default function Login() {
     });
 
     if (result.error) {
-      router.push("/recover"); // 🔴 Si las credenciales son incorrectas, redirige a recover
+      setLoginError(true);
     } else {
-      router.push("/"); // ✅ Si el login es exitoso, redirige a la página principal
+      router.push("/");
     }
   };
 
   return (
     <div className="relative w-full h-screen flex justify-center items-center bg-gray-900">
-      {/* Imagen de fondo */}
       <Image 
         src="/login.jpg" 
         alt="Fondo"
@@ -32,62 +33,56 @@ export default function Login() {
         className="absolute top-0 left-0 w-full h-full -z-10"
       />
 
-      {/* Cuadro del login con fondo blanco */}
-      <div className="bg-white shadow-xl rounded-lg p-6 w-[320px] border border-gray-300">
-        {/* Logo centrado arriba */}
-        <div className="text-center mb-4">
-          <Image src="/api_logo.png" alt="Logo" width={130} height={40} priority />
+      {/* Contenedor más grande con fondo blanco sólido */}
+      <div className="bg-white bg-opacity-100 shadow-xl rounded-xl p-8 w-[480px] border-2 border-gray-100 backdrop-blur-0 min-h-[420px]">
+        <div className="text-center mb-6">
+          <Image 
+            src="/api_logo.png" 
+            alt="Logo" 
+            width={160} 
+            height={50} 
+            priority 
+          />
         </div>
 
-        {/* Título del formulario */}
-        <h2 className="text-lg font-bold text-center text-gray-800 mb-4">Iniciar Sesión</h2>
+        <h2 className="text-xl font-bold text-center text-gray-800 mb-6">
+          Iniciar Sesión
+        </h2>
 
-        {/* Formulario de inicio de sesión */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Campo de correo electrónico */}
-          <div>
-            <label className="block text-xs font-medium text-gray-700">Correo electrónico</label>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {loginError && (
+            <div className="text-center text-xs text-red-600 mb-3">
+              Correo o contraseña incorrectos
+            </div>
+          )}
+
+          {/* Campos con tamaño controlado y mismo ancho */}
+          <div className="mx-4">
             <input
-              {...register("email", {
-                required: "Este campo es obligatorio",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Correo electrónico inválido"
-                }
-              })}
-              className="w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:border-red-500 focus:ring focus:ring-red-200 outline-none"
+              {...register("email", { required: true })}
+              placeholder="Ej: usuario@dominio.com"
+              className="w-[calc(100%-32px)] mx-auto block px-4 py-2.5 text-sm border-2 border-gray-200 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none placeholder-gray-400"
             />
-            {errors.email && (
-              <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
-            )}
           </div>
 
-          {/* Campo de contraseña */}
-          <div>
-            <label className="block text-xs font-medium text-gray-700">Contraseña</label>
+          <div className="mx-4">
             <input
               type="password"
-              {...register("password", {
-                required: "Este campo es obligatorio",
-                minLength: {
-                  value: 6,
-                  message: "Mínimo 6 caracteres"
-                }
-              })}
-              className="w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:border-red-500 focus:ring focus:ring-red-200 outline-none"
+              {...register("password", { required: true })}
+              placeholder="Escribe tu contraseña"
+              className="w-[calc(100%-32px)] mx-auto block px-4 py-2.5 text-sm border-2 border-gray-200 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none placeholder-gray-400"
             />
-            {errors.password && (
-              <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
-            )}
           </div>
 
-          {/* Botón de inicio de sesión en rojo */}
-          <button
-            type="submit"
-            className="w-full py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            Ingresar
-          </button>
+          {/* Botón más compacto */}
+          <div className="mx-4">
+            <button
+              type="submit"
+              className="w-full py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
+            >
+              Ingresar
+            </button>
+          </div>
         </form>
       </div>
     </div>
