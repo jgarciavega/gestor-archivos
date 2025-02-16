@@ -8,7 +8,7 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // Aquí puedes agregar extensiones personalizadas si las necesitas
+      // extensiones personalizadas si las necesitas
     },
   },
   plugins: [],
